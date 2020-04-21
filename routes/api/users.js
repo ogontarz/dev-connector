@@ -8,10 +8,10 @@ const { check, validationResult } = require('express-validator');
 
 const router = express.Router();
 
-// @route   GET api/users
-// @desc    Test route
+// @route   POST api/users
+// @desc    Create new user
 // @access  Public
-router.get(
+router.post(
 	'/',
 	[
 		check('name', 'Name is required').not().isEmpty(),
