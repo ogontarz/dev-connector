@@ -1,10 +1,11 @@
 const express = require('express');
-const router = express.Router();
 const { check, validationResult } = require('express-validator');
+
 const User = require('../../models/user');
-const Profile = require('../../models/profile');
 const Post = require('../../models/post');
 const auth = require('../../middleware/auth');
+
+const router = express.Router();
 
 // @route   POST api/posts
 // @desc    Create a post
@@ -23,7 +24,7 @@ router.post('/', [auth, [check('text', 'Text is required').not().isEmpty()]], as
 			user: req.user.id
 		});
 		const post = await newPost.save();
-		res.json(post);
+		res.status(200).json(post);
 	} catch (error) {
 		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
@@ -36,7 +37,7 @@ router.post('/', [auth, [check('text', 'Text is required').not().isEmpty()]], as
 router.get('/', auth, async (req, res) => {
 	try {
 		const posts = await Post.find().sort({ date: -1 });
-		res.json(posts);
+		res.status(200).json(posts);
 	} catch (error) {
 		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
@@ -52,12 +53,12 @@ router.get('/:id', auth, async (req, res) => {
 		if (!post) {
 			return res.status(404).json({ msg: 'Post not found' });
 		}
-		res.json(post);
+		res.status(200).json(post);
 	} catch (error) {
+		console.error(error.message);
 		if (error.name == 'CastError') {
 			return res.status(404).json({ msg: 'Post not found' });
 		}
-		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
 	}
 });
@@ -75,12 +76,12 @@ router.delete('/:id', auth, async (req, res) => {
 			return res.status(401).json({ msg: 'Need authorization' });
 		}
 		await post.remove();
-		res.json({ msg: 'Post removed' });
+		res.status(200).json({ msg: 'Post removed' });
 	} catch (error) {
+		console.error(error.message);
 		if (error.name == 'CastError') {
 			return res.status(404).json({ msg: 'Post not found' });
 		}
-		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
 	}
 });
@@ -102,12 +103,12 @@ router.put('/like/:post_id', auth, async (req, res) => {
 		}
 		post.likes.unshift({ user: req.user.id });
 		await post.save();
-		res.json(post.likes);
+		res.status(200).json(post.likes);
 	} catch (error) {
+		console.error(error.message);
 		if (error.name == 'CastError') {
 			return res.status(404).json({ msg: 'Post not found' });
 		}
-		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
 	}
 });
@@ -130,12 +131,12 @@ router.put('/unlike/:post_id', auth, async (req, res) => {
 		const removeIndex = post.likes.map((like) => like.user.toString()).indexOf(req.user.id);
 		post.likes.splice(removeIndex, 1);
 		await post.save();
-		res.json(post.likes);
+		res.status(200).json(post.likes);
 	} catch (error) {
+		console.error(error.message);
 		if (error.name == 'CastError') {
 			return res.status(404).json({ msg: 'Post not found' });
 		}
-		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
 	}
 });
@@ -159,7 +160,7 @@ router.post('/comment/:post_id', [auth, [check('text', 'Text is required').not()
 		};
 		post.comments.unshift(newComment);
 		await post.save();
-		res.json(post.comments);
+		res.status(200).json(post.comments);
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ msg: 'Server error' });
@@ -188,12 +189,12 @@ router.delete('/comment/:post_id/:comment_id', auth, async (req, res) => {
 		const removeIndex = post.comments.map((comment) => comment.id.toString()).indexOf(comment.id);
 		post.likes.splice(removeIndex, 1);
 		await post.save();
-		res.json(post.comments);
+		res.status(200).json(post.comments);
 	} catch (error) {
+		console.error(error.message);
 		if (error.name == 'CastError') {
 			return res.status(404).json({ msg: 'Post not found' });
 		}
-		console.error(error.message);
 		res.status(500).json({ msg: 'Server error' });
 	}
 });
